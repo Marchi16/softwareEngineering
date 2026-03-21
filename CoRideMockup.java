@@ -16,7 +16,7 @@ public class CoRideMockup {
     // ── Palette ──────────────────────────────────────────────
     static final Color BG       = new Color(0xFAFAF8);
     static final Color FG       = new Color(0x1A1A1A);
-    static final Color ACCENT   = new Color(0x1A5276);   // πράσινο (eco)
+    static final Color ACCENT   = new Color(0x1A5276);   // μπλε (eco)
     static final Color ACCENT2  = new Color(0x52B788);
     static final Color SUBTLE   = new Color(0xE8F5E9);
     static final Color BORDER   = new Color(0xCCCCCC);
