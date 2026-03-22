@@ -18,6 +18,10 @@ reduce costs, and minimize environmental impact.
 3. Run the application
 
 ## How to run in Git bash
+ΠΡΙΝ απο τα παρακατω βήματα, ρυθμισε τα στοιχεια σου (ιδανικα όπως τα εχεις και στη σελιδα του github)
+git config --global user.name "Marchi16"
+git config --global user.email "το-email-σου@gmail.com"
+
 1. Clone repo: git clone https://github.com/Marchi16/softwareEngineering.git
 2. Cd in main: cd softwareEngineering
 3. Για να δεις καθε αλλαγη που εγινε στο repository: git pull origin main
