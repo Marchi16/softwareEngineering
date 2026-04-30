@@ -1,621 +1,793 @@
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.table.*;
+import java.awt.*;
+import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
- * CoRide — Mock-up Screens (Java Swing)
- * Οθόνες: Login, Εγγραφή, Dashboard, Προσφορά Διαδρομής,
- *          Αναζήτηση & Κράτηση, Πόντοι & Προνόμια
+ * περιλαμβανει τις οθονες που περιγραφονται στις αναφορες μας, εχουν φτιαχτει με cardLayout
+ * για να μην ανοιγει ξεχωριστο παραθυρο σε καθε πατημα λειτουργιας
  *
- * Εκτέλεση: javac CoRideMockup.java && java CoRideMockup
+ * -προσομοιωση λειτουργιων οπως login, register, booking, rating
+ * -δεδομενα mock (χωρις υλοποιημενο backend / database)
+ * - σκοπος του κωδικα ειναι να δωσουμε ενα δειγμα λειτουργιας της ροης και το UI
+ * - δεν εχει γινει hashing δεδομενων απο καποιο site, ειναι dummy μονο για την προσομοιωση
  */
-public class CoRideMockup {
+class CoRideMockup_v01 {
+// ορισμος χρωματων που χρησιμοποιουμε στην εφαρμογη
+    // ── Palette ───────────────────────────────────────────────────────────────
+    static final Color BG        = new Color(0xF5F0FA);
+    static final Color FG        = new Color(0x1A1A1A);
+    static final Color ACCENT    = new Color(0x091E57);
+    static final Color ACCENT2   = new Color(0x213FA1);
+    static final Color SUBTLE    = new Color(0xE8F5E9);
+    static final Color BORDER    = new Color(0xCCCCCC);
+    static final Color MUTED     = new Color(0x388485);
+    static final Color CLR_ERROR = new Color(0xD32F2F);
+    static final Color ERROR_BG  = new Color(0xFFEBEE);
+    static final Color WARN_BG   = new Color(0xFFF8E1);
+    static final Color WARN_FG   = new Color(0xE65100);
+    static final Color INFO_BG   = new Color(0xE3F2FD);
+    static final Color INFO_FG   = new Color(0x1565C0);
 
-    // ── Palette ──────────────────────────────────────────────
-    static final Color BG       = new Color(0xFAFAF8);
-    static final Color FG       = new Color(0x1A1A1A);
-    static final Color ACCENT   = new Color(0x2D6A4F);   // πράσινο (eco)
-    static final Color ACCENT2  = new Color(0x52B788);
-    static final Color SUBTLE   = new Color(0xE8F5E9);
-    static final Color BORDER   = new Color(0xCCCCCC);
-    static final Color MUTED    = new Color(0x777777);
-    static final Font  TITLE    = new Font("SansSerif", Font.BOLD,  14);
-    static final Font  BODY     = new Font("SansSerif", Font.PLAIN, 12);
-    static final Font  SMALL    = new Font("SansSerif", Font.PLAIN, 10);
-    static final Font  BOLD_SM  = new Font("SansSerif", Font.BOLD,  11);
+    static final Font TITLE   = new Font("SansSerif", Font.BOLD,  14);
+    static final Font BODY    = new Font("SansSerif", Font.PLAIN, 12);
+    static final Font SMALL   = new Font("SansSerif", Font.PLAIN, 10);
+    static final Font BOLD_SM = new Font("SansSerif", Font.BOLD,  11);
 
-    // ── Entry point ──────────────────────────────────────────
+    // ── Mock Data ─────────────────────────────────────────────────────────────
+    static final String USER_NAME   = "Νίκος Παπαδόπουλος";
+    static final String USER_EMAIL  = "n.papadopoulos@company.gr";
+    static final int    USER_POINTS = 320;
+    static final String TODAY    = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    static final String TOMORROW = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+    // ── CardLayout globals ────────────────────────────────────────────────────
+    static JFrame     mainFrame;
+    static JPanel     cardPanel;
+    static CardLayout cardLayout;
+ // ονομαζουμε τις οθονες που εμφανιζονται στην εφαρμογη
+    static final String CARD_MENU     = "MENU";
+    static final String CARD_LOGIN    = "LOGIN";
+    static final String CARD_REGISTER = "REGISTER";
+    static final String CARD_DASH     = "DASHBOARD";
+    static final String CARD_OFFER    = "RIDE_OFFER";
+    static final String CARD_SEARCH   = "SEARCH";
+    static final String CARD_BOOKING  = "BOOKING";
+    static final String CARD_TRIP     = "TRIP";
+    static final String CARD_RATING   = "RATING";
+    static final String CARD_POINTS   = "POINTS";
+    static final String CARD_PROFILE  = "PROFILE";
+
+    // ── Entry point ───────────────────────────────────────────────────────────
+    // δημιουργει το κυριο παραθυρο και φορτωνει ολα τα στοιχεια
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             UIManager.put("Panel.background", BG);
-            showAllScreens();
+
+            mainFrame = new JFrame("CoRide v0.2 — Mock-up");
+            mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            mainFrame.setSize(460, 660);
+            mainFrame.setLocationRelativeTo(null);
+
+            cardLayout = new CardLayout();
+            cardPanel  = new JPanel(cardLayout);
+
+            cardPanel.add(buildMenu(),         CARD_MENU);
+            cardPanel.add(buildLogin(),        CARD_LOGIN);
+            cardPanel.add(buildRegister(),     CARD_REGISTER);
+            cardPanel.add(buildDashboard(),    CARD_DASH);
+            cardPanel.add(buildRideOffer(),    CARD_OFFER);
+            cardPanel.add(buildSearch(),       CARD_SEARCH);
+            cardPanel.add(buildBooking(),      CARD_BOOKING);
+            cardPanel.add(buildTripComplete(), CARD_TRIP);
+            cardPanel.add(buildRating(),       CARD_RATING);
+            cardPanel.add(buildPrivileges(),   CARD_POINTS);
+            cardPanel.add(buildProfile(),      CARD_PROFILE);
+
+            mainFrame.add(cardPanel);
+            mainFrame.setVisible(true);
+
+            showCard(CARD_MENU);
         });
     }
+// εμφανιζει την αντιστοιχη οθονη που επιλεγουμε απο τον 'καταλογο' με τις λειτουργιες (dashboard)
+    static void showCard(String name) {
+        cardLayout.show(cardPanel, name);
+    }
 
-    static void showAllScreens() {
-        // Κεντρικό μενού επιλογής οθόνης
-        JFrame menu = new JFrame("CoRide — Mock-up Navigator");
-        menu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        menu.setSize(340, 400);
-        menu.setLocationRelativeTo(null);
-
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(BG);
-        p.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+    // ══════════════════════════════════════════════════════════════════════════
+    // MENU
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildMenu() {
+        JPanel p = makeScrollPanel();
 
         JLabel logo = new JLabel("🌿 CoRide");
         logo.setFont(new Font("SansSerif", Font.BOLD, 22));
         logo.setForeground(ACCENT);
         logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel sub = new JLabel("Mock-up Screens Navigator");
-        sub.setFont(SMALL);
-        sub.setForeground(MUTED);
-        sub.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel ver = new JLabel("Mock-up v0.2  |  " + TODAY);
+        ver.setFont(SMALL);
+        ver.setForeground(MUTED);
+        ver.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         p.add(logo);
         p.add(Box.createVerticalStrut(4));
-        p.add(sub);
-        p.add(Box.createVerticalStrut(20));
-        p.add(makeSeparator());
+        p.add(ver);
         p.add(Box.createVerticalStrut(16));
+        p.add(makeSeparator());
+        p.add(Box.createVerticalStrut(12));
+
+        JPanel badge = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        badge.setBackground(BG);
+        badge.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+        p.add(badge);
+        p.add(Box.createVerticalStrut(10));
 
         Object[][] screens = {
-            {"Οθόνη 1α — Σύνδεση",  (Runnable) CoRideMockup::showLogin},
-            {"Οθόνη 1β — Εγγραφή",  (Runnable) CoRideMockup::showRegister},
-            {"Οθόνη 2  — Dashboard",  (Runnable) CoRideMockup::showDashboard},
-            {"Οθόνη 2β — Εγγραφή Οχήματος",  (Runnable) CoRideMockup::showVehicleRegister},
-            {"Οθόνη 2γ — Τροποποίηση Διαδρομής",  (Runnable) CoRideMockup::showEditRide},
-            {"Οθόνη 3  — Προσφορά Διαδρομής",  (Runnable) CoRideMockup::showRideOffer},
-            {"Οθόνη 4  — Αναζήτηση & Κράτηση",  (Runnable) CoRideMockup::showSearch},
-            {"Οθόνη 5  — Πόντοι & Προνόμια",  (Runnable) CoRideMockup::showPrivileges},
-            {"Οθόνη 6  — Στατιστικά",  (Runnable) CoRideMockup::showStatistics},
+                {"Σύνδεση",               CARD_LOGIN},
+                {"Εγγραφή",               CARD_REGISTER},
+                {"Dashboard",              CARD_DASH},
+                {"Προσφορά Διαδρομής",    CARD_OFFER},
+                {"Αναζήτηση & Κράτηση",   CARD_SEARCH},
+                {"Επιβεβαίωση Κράτησης",  CARD_BOOKING},
+                {"Ολοκλήρωση Μετακίνησης",CARD_TRIP},
+                {"Αξιολόγηση",             CARD_RATING},
+                {"Πόντοι & Προνόμια",      CARD_POINTS},
+                {"Προφίλ Χρήστη",          CARD_PROFILE},
         };
 
-        for (Object[] row : screens) {
-            JPanel rowPanel = new JPanel(new BorderLayout(8, 0));
-            rowPanel.setBackground(BG);
-            rowPanel.setMaximumSize(new Dimension(300, 36));
- 
-            JButton btn = makeButton((String) row[0]);
+        for (Object[] s : screens) {
+            String card = (String) s[1];
+            JButton btn = makeButton((String) s[0]);
             btn.setHorizontalAlignment(SwingConstants.LEFT);
-            Runnable action = (Runnable) row[1];
-            btn.addActionListener(e -> action.run());
-
-            rowPanel.add(btn, BorderLayout.CENTER);
-            p.add(rowPanel);
+            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+            btn.addActionListener(e -> showCard(card));
+            p.add(btn);
             p.add(Box.createVerticalStrut(5));
-        
         }
 
-        menu.add(new JScrollPane(p));
-        menu.setVisible(true);
+        return wrapScroll(p);
     }
 
-    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
     // SCREEN 1a — LOGIN
-    // ══════════════════════════════════════════════════════════
-    static void showLogin() {
-        JFrame f = makeFrame("Οθόνη 1α — Σύνδεση", 360, 420);
-        JPanel p = makePanel();
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildLogin() {
+        JPanel p = makeScrollPanel();
 
-        p.add(makeHeader("🌿 CoRide", "Καλωσόρισες"));
-        p.add(Box.createVerticalStrut(16));
+        p.add(makeBackButton(CARD_MENU));
+        p.add(makeHeader("🌿 CoRide", "Καλωσόρισες — Σύνδεση με εταιρικά στοιχεία"));
+        p.add(Box.createVerticalStrut(20));
 
-        p.add(makeFieldRow("Email:", new JTextField(18)));
+        JTextField emailField = new JTextField(18);
+        JPasswordField pwdField = new JPasswordField(18);
+
+        p.add(makeFieldRow("Email:", emailField));
         p.add(Box.createVerticalStrut(8));
-        p.add(makeFieldRow("Κωδικός:", new JPasswordField(18)));
+        p.add(makeFieldRow("Κωδικός:", pwdField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeAltNote("ⓘ Αποδεκτά emails: @company.gr μόνο"));
         p.add(Box.createVerticalStrut(16));
+
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
+        p.add(Box.createVerticalStrut(4));
 
         JButton login = makeAccentButton("ΣΥΝΔΕΣΗ");
         login.setAlignmentX(Component.CENTER_ALIGNMENT);
-        login.addActionListener(e -> showDashboard());
+        login.addActionListener(e -> {
+            String email = emailField.getText().trim();
+            String pwd   = new String(pwdField.getPassword()).trim();
+            boolean valid = true;
+            if (email.isEmpty()) { highlightError(emailField); valid = false; } else resetField(emailField);
+            if (pwd.isEmpty())   { highlightError(pwdField);   valid = false; } else resetField(pwdField);
+            if (!valid) { errLbl.setText("⚠ Συμπλήρωσε όλα τα υποχρεωτικά πεδία."); return; }
+            if (!email.endsWith("@company.gr")) {
+                highlightError(emailField);
+                errLbl.setText("⚠ Μη αποδεκτό email domain.");
+                return;
+            }
+            errLbl.setText(" ");
+            showCard(CARD_DASH);
+        });
         p.add(login);
+        p.add(Box.createVerticalStrut(10));
 
-        p.add(Box.createVerticalStrut(8));
+        JButton forgot = makeButton("Ξέχασες τον κωδικό; →");
+        forgot.setForeground(ACCENT);
+        forgot.setAlignmentX(Component.CENTER_ALIGNMENT);
+        forgot.addActionListener(e -> JOptionPane.showMessageDialog(mainFrame,
+                "Email επαναφοράς κωδικού θα αποσταλεί.",
+                "Επαναφορά Κωδικού", JOptionPane.INFORMATION_MESSAGE));
+        p.add(forgot);
+
         JButton reg = makeButton("Δεν έχεις λογαριασμό; Εγγραφή →");
         reg.setForeground(ACCENT);
         reg.setAlignmentX(Component.CENTER_ALIGNMENT);
-        reg.addActionListener(e -> showRegister());
+        reg.addActionListener(e -> showCard(CARD_REGISTER));
         p.add(reg);
 
-        p.add(Box.createVerticalStrut(16));
-        p.add(makeNote("* Σύνδεση με εταιρικά στοιχεία"));
-
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
+        return wrapScroll(p);
     }
 
-    // ══════════════════════════════════════════════════════════
-    // SCREEN 1b — REGISTER & PROFILE
-    // ══════════════════════════════════════════════════════════
-    static void showRegister() {
-        JFrame f = makeFrame("Οθόνη 1β — Εγγραφή & Δημιουργία Προφίλ", 400, 560);
-        JPanel p = makePanel();
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 1b — REGISTER
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildRegister() {
+        JPanel p = makeScrollPanel();
 
+        p.add(makeBackButton(CARD_MENU));
         p.add(makeHeader("ΕΓΓΡΑΦΗ", "Βήμα 1/2 — Στοιχεία Χρήστη"));
         p.add(Box.createVerticalStrut(12));
 
-        p.add(makeFieldRow("Όνομα:",       new JTextField(18)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Email:",       new JTextField(18)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Κωδικός:",     new JPasswordField(18)));
-        p.add(Box.createVerticalStrut(12));
-
-        p.add(makeSectionLabel("ΠΡΟΦΙΛ ΜΕΤΑΚΙΝΗΣΗΣ"));
-        p.add(Box.createVerticalStrut(8));
-
-        p.add(makeFieldRow("Διεύθυνση:",   new JTextField(18)));
-        p.add(Box.createVerticalStrut(6));
-
-        String[] roles = {"Οδηγός", "Επιβάτης", "Οδηγός & Επιβάτης"};
-        JComboBox<String> roleBox = new JComboBox<>(roles);
+        JTextField nameField  = new JTextField(18);
+        JTextField emailField = new JTextField(18);
+        JPasswordField pwdField = new JPasswordField(18);
+        JTextField addrField  = new JTextField(18);
+        JComboBox<String> roleBox = new JComboBox<>(new String[]{"Επιβάτης", "Οδηγός", "Οδηγός & Επιβάτης"});
         styleCombo(roleBox);
-        p.add(makeFieldRow("Ρόλος:",       roleBox));
+        JTextField schedField = new JTextField("08:00 - 17:00", 18);
+
+        p.add(makeFieldRow("Ονοματεπώνυμο: *", nameField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Email: *",          emailField));
+        p.add(Box.createVerticalStrut(4));
+        p.add(makeAltNote("ⓘ Απαιτείται εταιρικό email @company.gr"));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Κωδικός: *",        pwdField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Διεύθυνση:",         addrField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ρόλος:",             roleBox));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ωράριο:",            schedField));
+        p.add(Box.createVerticalStrut(10));
+
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
         p.add(Box.createVerticalStrut(6));
 
-        p.add(makeFieldRow("Ωράριο:",      new JTextField("π.χ. 08:00 - 17:00", 18)));
-        p.add(Box.createVerticalStrut(16));
-
-        JButton next = makeAccentButton("ΕΠΟΜΕΝΟ →");
+        JButton next = makeAccentButton("ΕΓΓΡΑΦΗ ✓");
         next.setAlignmentX(Component.CENTER_ALIGNMENT);
         next.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null,
-                "✅ Εγγραφή επιτυχής!\nΕπαλήθευση email αποστάλθηκε.",
-                "Επιβεβαίωση", JOptionPane.INFORMATION_MESSAGE);
-            showDashboard();
+            boolean valid = true;
+            if (nameField.getText().trim().isEmpty())  { highlightError(nameField);  valid = false; } else resetField(nameField);
+            if (emailField.getText().trim().isEmpty()) { highlightError(emailField); valid = false; } else resetField(emailField);
+            if (new String(pwdField.getPassword()).trim().isEmpty()) { highlightError(pwdField); valid = false; } else resetField(pwdField);
+            if (!valid) { errLbl.setText("⚠ Τα πεδία με * είναι υποχρεωτικά."); return; }
+            if (!emailField.getText().trim().endsWith("@company.gr")) {
+                highlightError(emailField);
+                errLbl.setText("⚠ Μη αποδεκτό domain.");
+                return;
+            }
+            errLbl.setText(" ");
+            JOptionPane.showMessageDialog(mainFrame,
+                    "✅ Εγγραφή επιτυχής!\nEmail επαλήθευσης εστάλη στο " + emailField.getText().trim(),
+                    "Επιβεβαίωση Εγγραφής", JOptionPane.INFORMATION_MESSAGE);
+            showCard(CARD_DASH);
         });
         p.add(next);
         p.add(Box.createVerticalStrut(6));
-        p.add(makeNote("* Επαλήθευση email απαιτείται για ενεργοποίηση (UC1a — include)"));
+        p.add(makeNote("* Υποχρεωτικά πεδία  |  Απαιτείται επαλήθευση email"));
 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
+        return wrapScroll(p);
     }
 
-    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
     // SCREEN 2 — DASHBOARD
-    // ══════════════════════════════════════════════════════════
-    static void showDashboard() {
-        JFrame f = makeFrame("Οθόνη 2 — Dashboard Εργαζόμενου", 380, 520);
-        JPanel p = makePanel();
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildDashboard() {
+        JPanel p = makeScrollPanel();
 
-        p.add(makeHeader("🌿 CoRide", "Γεια, Νίκη!"));
+        p.add(makeBackButton(CARD_MENU));
+        p.add(makeHeader("CoRide", "Γεια, " + USER_NAME.split(" ")[0] + "!  ·  " + TODAY));
         p.add(Box.createVerticalStrut(12));
 
-        // Points card
-        JPanel card = makeCard();
-        card.add(makeRow("Πόντοι:", "320 π.", true));
+        JPanel card = makeClickableCard("ΠΟΝΤΟΙ  →  Δες Προνόμια", () -> showCard(CARD_POINTS));
+        card.add(makeRow("Πόντοι:", USER_POINTS + " π.", true));
         card.add(Box.createVerticalStrut(4));
-        card.add(makeProgressBar(320, 500));
+        card.add(makeProgressBar(USER_POINTS, 500));
         card.add(Box.createVerticalStrut(4));
-        JLabel lvl = new JLabel("Επίπεδο 3 — Δωροκάρτα 10€  |  Επόμενο: 500π.");
-        lvl.setFont(SMALL);
-        lvl.setForeground(MUTED);
-        card.add(lvl);
+        card.add(new JLabel("Επίπεδο 3  |  Δωροκάρτα 10€  |  Επόμενο: 500π.  (180π. ακόμα)") {{
+            setFont(SMALL); setForeground(MUTED); }});
         p.add(card);
         p.add(Box.createVerticalStrut(12));
 
-        // Actions
+        p.add(makeSectionLabel("ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ"));
+        p.add(Box.createVerticalStrut(6));
+        JPanel pendCard = makeClickableCard("📋 Εκκρεμεί επιβεβαίωση από οδηγό  →  Δες", () -> showCard(CARD_BOOKING));
+        pendCard.add(new JLabel("Γιώργος Π.  ·  " + TOMORROW + "  ·  08:15") {{
+            setFont(SMALL); setForeground(MUTED); }});
+        pendCard.add(new JLabel("Κατάσταση:  Αναμονή Επιβεβαίωσης") {{
+            setFont(SMALL); setForeground(WARN_FG); }});
+        p.add(pendCard);
+        p.add(Box.createVerticalStrut(12));
+
         p.add(makeSectionLabel("ΓΡΗΓΟΡΕΣ ΕΝΕΡΓΕΙΕΣ"));
         p.add(Box.createVerticalStrut(6));
-
         JPanel btnRow = new JPanel(new GridLayout(1, 2, 8, 0));
         btnRow.setBackground(BG);
-        btnRow.setMaximumSize(new Dimension(320, 44));
-
-        JButton offer = makeAccentButton("🚗 Προσφορά Διαδρομής");
-        offer.addActionListener(e -> showRideOffer());
-        JButton search = makeButton("🔍 Αναζήτηση Διαδρομής");
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        JButton offer  = makeAccentButton("Προσφορά");
+        offer.addActionListener(e -> showCard(CARD_OFFER));
+        JButton search = makeButton("Αναζήτηση");
         search.setBorder(BorderFactory.createLineBorder(ACCENT, 2));
         search.setForeground(ACCENT);
-        search.addActionListener(e -> showSearch());
-
+        search.addActionListener(e -> showCard(CARD_SEARCH));
         btnRow.add(offer);
         btnRow.add(search);
         p.add(btnRow);
-        p.add(Box.createVerticalStrut(8));
-
-        //Κουμπί "Οι Διαδρομές μου" -> showEditRide
-        JButton myRides = makeButton("✏️ Διαδρομές μου (Τροποποίηση)");
-        myRides.setForeground(ACCENT);
-        myRides.setAlignmentX(Component.LEFT_ALIGNMENT);
-        myRides.addActionListener(e -> showEditRide());
-        p.add(myRides);
         p.add(Box.createVerticalStrut(12));
 
-        // Stats
         p.add(makeSectionLabel("ΣΤΑΤΙΣΤΙΚΑ ΜΗΝΑ"));
         p.add(Box.createVerticalStrut(6));
         JPanel stats = makeCard();
         stats.add(makeRow("Μετακινήσεις:", "12", false));
-        stats.add(makeRow("Εξοικονόμηση CO₂:", "~18 kg", false));
-        stats.add(makeRow("Κοινά χιλιόμετρα:", "240 km", false));
-
-        //Κουμπί "Περισσότερα Στατιστικά" -> showStatistics
-         JButton moreStats = makeButton("📊 Αναλυτικά Στατιστικά →");
-        moreStats.setFont(SMALL); moreStats.setForeground(ACCENT);
-        moreStats.addActionListener(e -> showStatistics());
-        stats.add(Box.createVerticalStrut(6));
-        stats.add(moreStats);
+        stats.add(makeRow("Εξοικονόμηση CO₂:", "~18.4 kg", false));
+        stats.add(makeRow("Κοινά χιλιόμετρα:", "247 km", false));
+        stats.add(makeRow("Θέση Leaderboard:", "#4 / 38", false));
         p.add(stats);
-
-        // Nav bar
         p.add(Box.createVerticalStrut(12));
+
         p.add(makeSeparator());
         p.add(makeNavBar("Home"));
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
+
+        return wrapScroll(p);
     }
 
-
-     // ══════════════════════════════════════════════════════════
-    // SCREEN 2β — VEHICLE REGISTRATION
-    // ══════════════════════════════════════════════════════════
-    static void showVehicleRegister() {
-        JFrame f = makeFrame("Οθόνη 2β — Εγγραφή Οχήματος", 400, 440);
-        JPanel p = makePanel();
- 
-        JButton back = makeButton("← Πίσω");
-        back.setForeground(ACCENT);
-        back.addActionListener(e -> showDashboard());
-        p.add(back);
- 
-        p.add(makeHeader("ΕΓΓΡΑΦΗ ΟΧΗΜΑΤΟΣ","Vehicle Registration Controller"));
-        p.add(Box.createVerticalStrut(12));
-        p.add(Box.createVerticalStrut(10));
- 
-        p.add(makeFieldRow("Μάρκα:",    new JTextField("π.χ. Toyota", 16)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Μοντέλο:", new JTextField("π.χ. Yaris", 16)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Χρώμα:",   new JTextField("π.χ. Λευκό", 16)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Πινακίδα:", new JTextField("π.χ. ABC-1234", 16)));
-        p.add(Box.createVerticalStrut(6));
-        JComboBox<String> seats = new JComboBox<>(new String[]{"2","3","4","5"});
-        styleCombo(seats);
-        p.add(makeFieldRow("Μέγ. θέσεις:", seats));
-        p.add(Box.createVerticalStrut(16));
- 
-        JButton save = makeAccentButton("ΑΠΟΘΗΚΕΥΣΗ ΟΧΗΜΑΤΟΣ");
-        save.setAlignmentX(Component.CENTER_ALIGNMENT);
-        save.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null,
-                "✅ Όχημα εγγράφηκε! (Vehicle.validate() → Vehicle(new))\n" +
-                "Συνέχεια στη δημοσίευση προσφοράς.",
-                "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
-            showRideOffer();
-        });
-        p.add(save);
- 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
-    }
- 
-    // ══════════════════════════════════════════════════════════
-    // SCREEN 2γ — EDIT / CANCEL RIDE
-    // ══════════════════════════════════════════════════════════
-    static void showEditRide() {
-        JFrame f = makeFrame("Οθόνη 2γ — Τροποποίηση Διαδρομής", 400, 520);
-        JPanel p = makePanel();
- 
-        JButton back = makeButton("← Πίσω");
-        back.setForeground(ACCENT);
-        back.addActionListener(e -> showDashboard());
-        p.add(back);
- 
-        p.add(makeHeader("ΔΙΑΔΡΟΜΕΣ ΜΟΥ",
-            "Route list Controller → RideOffer"));
-        p.add(Box.createVerticalStrut(12));
- 
-        // Λίστα ενεργών διαδρομών
-        p.add(makeSectionLabel("ΕΝΕΡΓΕΣ ΠΡΟΣΦΟΡΕΣ"));
-        p.add(Box.createVerticalStrut(6));
- 
-        String[][] offers = {
-            {"Παρ. 25/04/2026", "08:00", "Τρίκαλα → Εταιρεία", "2 θέσεις"},
-            {"Δευτ. 28/04/2026", "08:30", "Τρίκαλα → Εταιρεία", "1 θέση"},
-        };
- 
-        for (String[] o : offers) {
-            JPanel card = makeCard();
-            JLabel title = new JLabel("📅 " + o[0] + "  " + o[1]);
-            title.setFont(BOLD_SM); title.setForeground(ACCENT);
-            card.add(title);
-            card.add(new JLabel("📍 " + o[2] + "  |  👥 " + o[3]));
- 
-            JPanel btnRow2 = new JPanel(new GridLayout(1, 2, 6, 0));
-            btnRow2.setBackground(Color.WHITE);
- 
-            JButton edit = makeAccentButton("✏️ Τροποποίηση");
-            edit.setFont(SMALL);
-            edit.addActionListener(e -> showEditForm(o));
- 
-            JButton cancel = makeButton("✖ Ακύρωση");
-            cancel.setFont(SMALL);
-            cancel.setBorder(BorderFactory.createLineBorder(BORDER, 1));
-            cancel.addActionListener(e -> {
-                int r = JOptionPane.showConfirmDialog(null,
-                    "Επιβεβαίωση ακύρωσης; Οι επιβάτες θα ειδοποιηθούν (NotificationCtrl).",
-                    "Confirm Cancel Dialog", JOptionPane.YES_NO_OPTION);
-                if (r == JOptionPane.YES_OPTION) {
-                    JOptionPane.showMessageDialog(null,
-                        "✅ Ακύρωση! Cancel Offer Ctrl → RideOffer(cancelled) → Push Email");
-                }
-            });
- 
-            btnRow2.add(edit);
-            btnRow2.add(cancel);
-            card.add(Box.createVerticalStrut(6));
-            card.add(btnRow2);
-            p.add(card);
-            p.add(Box.createVerticalStrut(6));
-        }
- 
-        p.add(makeNote("* Δεν υπάρχει ενεργή διαδρομή → No Active Route Msg"));
-        p.add(makeNote("* Μειωμένες θέσεις → Warning Seats Dialog"));
-        p.add(makeNote("* Ακύρωση → Confirm Cancel Dialog (v0.2)"));
- 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
-    }
- 
-    // Φόρμα τροποποίησης μιας διαδρομής
-    static void showEditForm(String[] offer) {
-        JFrame f = makeFrame("Τροποποίηση: " + offer[0], 380, 360);
-        JPanel p = makePanel();
-        p.add(makeHeader("ΤΡΟΠΟΠΟΙΗΣΗ", "Route Load Ctrl → Route Update Ctrl"));
-        p.add(Box.createVerticalStrut(12));
-        p.add(makeFieldRow("Ώρα εκκίν.:", new JTextField(offer[1], 16)));
-        p.add(Box.createVerticalStrut(6));
-        JComboBox<String> seats = new JComboBox<>(new String[]{"1 θέση","2 θέσεις","3 θέσεις","4 θέσεις"});
-        styleCombo(seats);
-        p.add(makeFieldRow("Θέσεις:", seats));
-        p.add(Box.createVerticalStrut(16));
-        JButton save = makeAccentButton("ΑΠΟΘΗΚΕΥΣΗ");
-        save.setAlignmentX(Component.CENTER_ALIGNMENT);
-        save.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null,
-                "✅ Route Update Ctrl → RideOffer ενημερώθηκε!\n" +
-                "Notification Ctrl → Push Email σε επιβάτες.");
-            f.dispose();
-        });
-        p.add(save);
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeNote("* Εναλλ. Α4 (Warning Seats): αν νέες θέσεις < κρατήσεις → Warning Dialog"));
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
-    }
-    
-
-    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
     // SCREEN 3 — RIDE OFFER
-    // ══════════════════════════════════════════════════════════
-    static void showRideOffer() {
-        JFrame f = makeFrame("Οθόνη 3 — Δημοσίευση Προσφοράς Διαδρομής", 400, 520);
-        JPanel p = makePanel();
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildRideOffer() {
+        JPanel p = makeScrollPanel();
 
-        JButton back = makeButton("← Πίσω");
-        back.setForeground(ACCENT);
-        back.addActionListener(e -> showDashboard());
-        p.add(back);
-
+        p.add(makeBackButton(CARD_DASH));
         p.add(makeHeader("ΠΡΟΣΦΟΡΑ ΔΙΑΔΡΟΜΗΣ", "Δημοσίευση Προσφοράς"));
-        p.add(Box.createVerticalStrut(10));
+        p.add(Box.createVerticalStrut(12));
 
-        //Έλεγχος οχήματος
-        JPanel vehicleCard = makeCard();
-        vehicleCard.add(new JLabel("🚗  Εγγεγραμμένο Όχημα: Toyota Yaris — ABC-1234"));
-        JButton changeVehicle = makeButton("+ Εγγραφή νέου οχήματος");
-        changeVehicle.setFont(SMALL); changeVehicle.setForeground(ACCENT);
-        changeVehicle.addActionListener(e -> showVehicleRegister());
-        vehicleCard.add(changeVehicle);
-        p.add(vehicleCard);
-        p.add(makeNote("* Vehicle Controller ελέγχει αν υπάρχει Vehicle"));
-        p.add(Box.createVerticalStrut(10));
- 
-        p.add(makeFieldRow("Ημερομηνία:", new JTextField("π.χ. 28/04/2026", 16)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Ώρα εκκίν.:", new JTextField("π.χ. 08:00", 16)));
-        p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Εκκίνηση:", new JTextField("π.χ. Τρίκαλα, Καρδίτσης", 16)));
-        p.add(Box.createVerticalStrut(6));
+        JTextField dateField  = new JTextField(TOMORROW, 16);
+        JTextField timeField  = new JTextField("08:00", 16);
+        JTextField startField = new JTextField("Τρίκαλα, Καρδίτσης 14", 16);
+        JTextField destField  = new JTextField("Βιομηχανική Ζώνη, Λάρισα", 16);
         JComboBox<String> seatsBox = new JComboBox<>(new String[]{"1 θέση","2 θέσεις","3 θέσεις","4 θέσεις"});
+        seatsBox.setSelectedIndex(1);
         styleCombo(seatsBox);
-        p.add(makeFieldRow("Θέσεις:", seatsBox));
+        JComboBox<String> vehicleBox = new JComboBox<>(new String[]{"Toyota Yaris — ΑΒΓ-1234", "+ Προσθήκη νέου οχήματος"});
+        styleCombo(vehicleBox);
+
+        p.add(makeFieldRow("Ημερομηνία: *",    dateField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ώρα εκκίνησης: *", timeField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Εκκίνηση: *",      startField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Προορισμός: *",    destField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Θέσεις:",          seatsBox));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Όχημα:",           vehicleBox));
         p.add(Box.createVerticalStrut(12));
 
-        //Map review
-        JPanel mapCard = makeCard();
-        JLabel mapLbl = new JLabel("🗺  Χάρτης Διαδρομής (Map Review)");
-        mapLbl.setFont(SMALL); mapLbl.setForeground(MUTED);
-        mapCard.add(mapLbl);
-        JPanel mapRect = new JPanel();
-        mapRect.setBackground(new Color(0xDCEFD8));
-        mapRect.setPreferredSize(new Dimension(300, 60));
-        mapRect.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-        mapRect.add(new JLabel("[Προεπισκόπηση διαδρομής]"));
-        mapCard.add(mapRect);
-        p.add(mapCard);
+        p.add(makeSectionLabel("ΠΡΟΕΠΙΣΚΟΠΗΣΗ ΔΙΑΔΡΟΜΗΣ"));
+        p.add(Box.createVerticalStrut(6));
+        JPanel mapPanel = new JPanel();
+        mapPanel.setBackground(new Color(0xE8F4EA));
+        mapPanel.setBorder(BorderFactory.createLineBorder(ACCENT2, 1));
+        mapPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        mapPanel.add(new JLabel("~42 km  |  ~38 λεπτά  |  CO₂ εξοικονόμηση: ~3.2 kg") {{
+            setFont(SMALL); setForeground(ACCENT); }});
+        p.add(mapPanel);
         p.add(Box.createVerticalStrut(12));
- 
+
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
+        p.add(Box.createVerticalStrut(4));
+
         JPanel btnRow = new JPanel(new GridLayout(1, 2, 8, 0));
         btnRow.setBackground(BG);
-        btnRow.setMaximumSize(new Dimension(320, 38));
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         JButton cancel = makeButton("ΑΚΥΡΩΣΗ");
         cancel.setBorder(BorderFactory.createLineBorder(BORDER, 1));
-        cancel.addActionListener(e -> showDashboard());
+        cancel.addActionListener(e -> showCard(CARD_DASH));
         JButton publish = makeAccentButton("ΔΗΜΟΣΙΕΥΣΗ ✓");
         publish.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null,
-                "✅ Offer Creation Controller → RideOffer(new, status=open)\n" +
-                "Αν ίδια ώρα/διαδρομή → Duplicate Warning",
-                "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
-            showDashboard();
+            boolean valid = true;
+            for (JTextField tf : new JTextField[]{dateField, timeField, startField, destField}) {
+                if (tf.getText().trim().isEmpty()) { highlightError(tf); valid = false; } else resetField(tf);
+            }
+            if (!valid) { errLbl.setText("⚠ Τα πεδία με * είναι υποχρεωτικά."); return; }
+            if (dateField.getText().equals(TOMORROW) && timeField.getText().equals("08:00")) {
+                int res = JOptionPane.showConfirmDialog(mainFrame,
+                        "⚠ Υπάρχει ήδη ενεργή προσφορά για " + TOMORROW + " 08:00.\nΘέλεις να συνεχίσεις;",
+                        "Διπλότυπη Προσφορά", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (res != JOptionPane.YES_OPTION) return;
+            }
+            errLbl.setText(" ");
+            JOptionPane.showMessageDialog(mainFrame,
+                    "Η προσφορά δημοσιεύτηκε!\n" + TOMORROW + " — 08:00\n" +
+                            startField.getText().trim() + " → " + destField.getText().trim() +
+                            "\n(RideOffer δημιουργήθηκε, status=open)",
+                    "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+            showCard(CARD_DASH);
         });
         btnRow.add(cancel);
         btnRow.add(publish);
         p.add(btnRow);
         p.add(Box.createVerticalStrut(6));
-        p.add(makeNote("*Validation Error | Ακύρωση | Νέο όχημα | Duplicate Warning"));
- 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
-        
+        p.add(makeNote("* Υποχρεωτικά  |  Ημ/νία πρέπει να είναι > σήμερα  |  Θέσεις 1-4"));
+
+        return wrapScroll(p);
     }
-    
-    // ══════════════════════════════════════════════════════════
+
+    // ══════════════════════════════════════════════════════════════════════════
     // SCREEN 4 — SEARCH & BOOK
-    // ══════════════════════════════════════════════════════════
-    static void showSearch() {
-        JFrame f = makeFrame("Οθόνη 4 — Αναζήτηση & Κράτηση Διαδρομής", 420, 620);
-        JPanel p = makePanel();
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildSearch() {
+        JPanel p = makeScrollPanel();
 
-        JButton back = makeButton("← Πίσω");
-        back.setForeground(ACCENT);
-        back.addActionListener(e -> showDashboard());
-        p.add(back);
-
-        p.add(makeHeader("ΑΝΑΖΗΤΗΣΗ ΔΙΑΔΡΟΜΗΣ","Search Controller"));
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader("ΑΝΑΖΗΤΗΣΗ ΔΙΑΔΡΟΜΗΣ", "RideOffer"));
         p.add(Box.createVerticalStrut(12));
-        
 
-        p.add(makeFieldRow("Ημερομηνία:", new JTextField("π.χ. 28/03/2026", 16)));
+        JTextField dateField = new JTextField(TOMORROW, 16);
+        JTextField timeField = new JTextField("08:00", 16);
+        JTextField areaField = new JTextField("Τρίκαλα", 16);
+
+        p.add(makeFieldRow("Ημερομηνία: *",      dateField));
         p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Ώρα:",         new JTextField("π.χ. 08:00", 16)));
+        p.add(makeFieldRow("Ώρα (περίπου):",     timeField));
         p.add(Box.createVerticalStrut(6));
-        p.add(makeFieldRow("Περιοχή:",     new JTextField("π.χ. Τρίκαλα", 16)));
+        p.add(makeFieldRow("Περιοχή εκκίνησης:", areaField));
         p.add(Box.createVerticalStrut(10));
 
-        //Filter Panel
-         p.add(makeSectionLabel("ΦΙΛΤΡΑ (Filter Controller — Filter Panel)"));
-        p.add(Box.createVerticalStrut(4));
-        JPanel filterPanel = makeCard();
-        JCheckBox cbRating = new JCheckBox("Αξιολόγηση ≥ 4★");
-        cbRating.setFont(SMALL); cbRating.setBackground(Color.WHITE);
-        JCheckBox cbSeats = new JCheckBox("Τουλάχιστον 1 θέση");
-        cbSeats.setFont(SMALL); cbSeats.setBackground(Color.WHITE); cbSeats.setSelected(true);
-        filterPanel.add(cbRating);
-        filterPanel.add(cbSeats);
-        p.add(filterPanel);
-        p.add(Box.createVerticalStrut(10));
- 
-        JButton searchBtn = makeAccentButton("🔍 ΑΝΑΖΗΤΗΣΗ");
-        searchBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        p.add(searchBtn);
-        p.add(Box.createVerticalStrut(12));
- 
-        p.add(makeSectionLabel("ΑΠΟΤΕΛΕΣΜΑΤΑ (2) — Search Results list"));
-        p.add(Box.createVerticalStrut(6));
- 
-        Object[][] results = {
-            {"Γιώργος Π.", "08:15", "Τρίκαλα, Καρδίτσης", "2", "4.8", false},
-            {"Μαρία Κ.",   "08:30", "Τρίκαλα, Κεντρική",  "0", "4.5", true}, 
-        };
- 
-        for (Object[] r : results) {
-            JPanel card = makeCard();
-            JPanel top = new JPanel(new BorderLayout());
-            top.setBackground(Color.WHITE);
-            JLabel name = new JLabel((String) r[0]);
-            name.setFont(BOLD_SM);
-            JLabel time = new JLabel((String) r[1]);
-            time.setFont(BOLD_SM); time.setForeground(ACCENT);
-            top.add(name, BorderLayout.WEST);
-            top.add(time, BorderLayout.EAST);
-            card.add(top);
- 
-            JLabel info = new JLabel("📍 " + r[2] + "  ·  👥 " + r[3] + " θέση  ·  ⭐ " + r[4]);
-            info.setFont(SMALL); info.setForeground(MUTED);
-            card.add(info);
- 
-            boolean full = (boolean) r[5];
-            if (full) {
-                //Full Route Message
-                JLabel fullMsg = new JLabel("⚠ Full Route Message: Δεν υπάρχουν θέσεις!");
-                fullMsg.setFont(SMALL); fullMsg.setForeground(new Color(0xB00020));
-                card.add(fullMsg);
-            } else {
-                JPanel bookRow = new JPanel(new GridLayout(1, 2, 6, 0));
-                bookRow.setBackground(Color.WHITE);
- 
-                JButton book = makeAccentButton("ΚΡΑΤΗΣΗ ✓");
-                book.setFont(SMALL);
-                final String nm = (String) r[0];
-                book.addActionListener(e -> JOptionPane.showMessageDialog(null,
-                    "✅ Booking(pending) → Notification Ctrl → Push Email στον οδηγό.\n" +
-                    "Διπλότυπη κράτηση → Duplicate Booking Error",
-                    "Κράτηση — " + nm, JOptionPane.INFORMATION_MESSAGE));
-                //Ακύρωση Κράτησης
-                JButton cancelBook = makeButton("✖ Ακύρωση");
-                cancelBook.setFont(SMALL);
-                cancelBook.setBorder(BorderFactory.createLineBorder(BORDER, 1));
-                cancelBook.addActionListener(e -> JOptionPane.showMessageDialog(null,
-                    "Cancel Booking Controller → Booking(cancelled) → Notification Ctrl",
-                    "Ακύρωση Κράτησης", JOptionPane.INFORMATION_MESSAGE));
- 
-                bookRow.add(book);
-                bookRow.add(cancelBook);
-                card.add(Box.createVerticalStrut(4));
-                card.add(bookRow);
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
+
+        JButton search = makeAccentButton("ΑΝΑΖΗΤΗΣΗ");
+        search.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel resultsPanel = new JPanel();
+        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
+        resultsPanel.setBackground(BG);
+        resultsPanel.setVisible(false);
+
+        search.addActionListener(e -> {
+            if (dateField.getText().trim().isEmpty()) {
+                highlightError(dateField);
+                errLbl.setText("⚠ Η ημερομηνία είναι υποχρεωτική.");
+                return;
             }
-            p.add(card);
-            p.add(Box.createVerticalStrut(6));
-        }
- 
-        p.add(makeNote("* Εναλλ. Α1: No Result Message | Α2: Full Route Message | Α3: Cancel Booking | Α5: Duplicate (v0.2)"));
- 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
+            resetField(dateField);
+            errLbl.setText(" ");
+            resultsPanel.removeAll();
+
+            if (areaField.getText().trim().equalsIgnoreCase("Άγνωστο")) {
+                resultsPanel.add(makeErrorCard(
+                        "⚠ Δεν βρέθηκαν διαδρομές για τα κριτήρια σου.",
+                        "Δοκίμασε άλλη ημερομηνία ή περιοχή."));
+            } else {
+                resultsPanel.add(makeSectionLabel("ΑΠΟΤΕΛΕΣΜΑΤΑ (2)"));
+                resultsPanel.add(Box.createVerticalStrut(6));
+
+                String[][] results = {
+                        {"Γιώργος Παπαδόπουλος","08:15","Τρίκαλα, Καρδίτσης 14","2","4.8","available"},
+                        {"Μαρία Κωνσταντίνου",  "08:30","Τρίκαλα, Κεντρική Πλ.","0","4.5","full"},
+                };
+
+                for (String[] r : results) {
+                    boolean full = r[5].equals("full");
+                    JPanel card = makeCard();
+                    JPanel top = new JPanel(new BorderLayout());
+                    top.setBackground(Color.WHITE);
+                    JLabel name = new JLabel(r[0]); name.setFont(BOLD_SM);
+                    JLabel time = new JLabel(r[1]); time.setFont(BOLD_SM); time.setForeground(ACCENT);
+                    top.add(name, BorderLayout.WEST);
+                    top.add(time, BorderLayout.EAST);
+                    card.add(top);
+                    card.add(new JLabel("📍 " + r[2] + "  ·  👥 " + r[3] + " θέσεις  ·  ⭐ " + r[4]) {{
+                        setFont(SMALL); setForeground(MUTED); }});
+                    if (full) {
+                        card.add(new JLabel("🔴 Πλήρης — Δεν υπάρχουν διαθέσιμες θέσεις") {{
+                            setFont(SMALL); setForeground(CLR_ERROR); }});
+                    } else {
+                        JButton book = makeAccentButton("ΚΡΑΤΗΣΗ ✓");
+                        book.setFont(SMALL);
+                        book.addActionListener(ev -> {
+                            JOptionPane.showMessageDialog(mainFrame,
+                                    "✅ Αίτημα κράτησης εστάλη!\nΟδηγός: " + r[0] + "  ·  " + r[1],
+                                    "Κράτηση", JOptionPane.INFORMATION_MESSAGE);
+                            showCard(CARD_BOOKING);
+                        });
+                        card.add(Box.createVerticalStrut(4));
+                        card.add(book);
+                    }
+                    resultsPanel.add(card);
+                    resultsPanel.add(Box.createVerticalStrut(6));
+                }
+            }
+            resultsPanel.setVisible(true);
+            resultsPanel.revalidate();
+            resultsPanel.repaint();
+        });
+
+        p.add(search);
+        p.add(Box.createVerticalStrut(12));
+        p.add(resultsPanel);
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeNote("Γράψε «Άγνωστο» στο πεδίο Περιοχή για εναλλακτική ροή Α1"));
+        p.add(Box.createVerticalStrut(8));
+        p.add(makeSeparator());
+        p.add(makeNavBar("Διαδρομές"));
+
+        return wrapScroll(p);
     }
 
-        
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 5 — BOOKING CONFIRM
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildBooking() {
+        JPanel p = makeScrollPanel();
 
-    // ══════════════════════════════════════════════════════════
-    // SCREEN 5 — POINTS & PRIVILEGES
-    // ══════════════════════════════════════════════════════════
-    static void showPrivileges() {
-        JFrame f = makeFrame("Οθόνη 5 — Πόντοι & Προνόμια", 420, 560);
-        JPanel p = makePanel();
-
-        p.add(makeHeader("🏆 ΠΟΝΤΟΙ & ΠΡΟΝΟΜΙΑ","Gamification"));
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader("📋 ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ", "UC5 — BookingMgmtController"));
+        p.add(Box.createVerticalStrut(12));
+        p.add(makeAltNote("ⓘ Ο οδηγός βλέπει αυτή την οθόνη μετά από push notification"));
         p.add(Box.createVerticalStrut(12));
 
-        // Points summary
         JPanel card = makeCard();
-        JLabel pts = new JLabel("320 π.", SwingConstants.CENTER);
-        pts.setFont(new Font("SansSerif", Font.BOLD, 26));
-        pts.setForeground(ACCENT);
-        card.add(pts);
-        card.add(Box.createVerticalStrut(4));
-        card.add(makeProgressBar(320, 500));
-        card.add(Box.createVerticalStrut(4));
-        JLabel lvlLbl = new JLabel("Επίπεδο 3 — Δωροκάρτα 10€  |  180π. ακόμα για Επ.4");
-        lvlLbl.setFont(SMALL);
-        lvlLbl.setForeground(MUTED);
-        card.add(lvlLbl);
+        card.add(new JLabel("Αίτημα κράτησης από:") {{ setFont(SMALL); setForeground(MUTED); }});
+        card.add(new JLabel("Αλέξης Δημητρίου") {{ setFont(BOLD_SM); setForeground(FG); }});
+        card.add(Box.createVerticalStrut(6));
+        card.add(makeRow("Ημερομηνία:", TOMORROW + "  08:15", false));
+        card.add(makeRow("Διαδρομή:", "Τρίκαλα → Βιομηχανική Ζώνη", false));
+        card.add(makeRow("Θέση:", "1 από 2 διαθέσιμες", false));
+        card.add(makeRow("Κατάσταση:", "⏳ pending", false));
+        card.add(Box.createVerticalStrut(8));
+
+        JPanel btns = new JPanel(new GridLayout(1, 2, 8, 0));
+        btns.setBackground(Color.WHITE);
+        JButton accept = makeAccentButton("✓ ΕΠΙΒΕΒΑΙΩΣΗ");
+        accept.addActionListener(e -> {
+            JOptionPane.showMessageDialog(mainFrame,
+                    "✅ Κράτηση επιβεβαιώθηκε!\n(Booking status=confirmed → Push στον Αλέξη)",
+                    "Επιβεβαίωση", JOptionPane.INFORMATION_MESSAGE);
+            showCard(CARD_DASH);
+        });
+        JButton reject = makeButton("✗ ΑΠΟΡΡΙΨΗ");
+        reject.setForeground(CLR_ERROR);
+        reject.setBorder(BorderFactory.createLineBorder(CLR_ERROR, 1));
+        reject.addActionListener(e -> {
+            JOptionPane.showMessageDialog(mainFrame,
+                    "Απόρριψη\n(Booking status=rejected → Push στον Αλέξη)",
+                    "Απόρριψη", JOptionPane.WARNING_MESSAGE);
+            showCard(CARD_DASH);
+        });
+        btns.add(accept);
+        btns.add(reject);
+        card.add(btns);
         p.add(card);
         p.add(Box.createVerticalStrut(12));
 
-        // Privileges table
+        p.add(makeWarnCard("⏱ Auto-cancel",
+                "Αν δεν απαντήσεις εντός 2 ωρών, η κράτηση ακυρώνεται αυτόματα."));
+        p.add(Box.createVerticalStrut(12));
+
+        p.add(makeSectionLabel("Ακύρωση από Επιβάτη"));
+        p.add(Box.createVerticalStrut(6));
+        JPanel cancelCard = makeCard();
+        cancelCard.add(new JLabel("Κράτηση από Αλέξη Δ.  ·  " + TOMORROW + "  08:15") {{ setFont(SMALL); }});
+        JButton cancelBooking = makeButton("ΑΚΥΡΩΣΗ ΚΡΑΤΗΣΗΣ");
+        cancelBooking.setForeground(CLR_ERROR);
+        cancelBooking.setFont(SMALL);
+        cancelBooking.addActionListener(e -> {
+            int res = JOptionPane.showConfirmDialog(mainFrame,
+                    "Είσαι σίγουρος; Πολιτική ακύρωσης: έως 1 ώρα πριν.",
+                    "Επιβεβαίωση Ακύρωσης", JOptionPane.YES_NO_OPTION);
+            if (res == JOptionPane.YES_OPTION) {
+                JOptionPane.showMessageDialog(mainFrame,
+                        "(Booking status=cancelled → Push στον οδηγό)",
+                        "Ακύρωση", JOptionPane.INFORMATION_MESSAGE);
+                showCard(CARD_DASH);
+            }
+        });
+        cancelCard.add(cancelBooking);
+        p.add(cancelCard);
+
+        return wrapScroll(p);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 6 — TRIP COMPLETE
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildTripComplete() {
+        JPanel p = makeScrollPanel();
+
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader("🚗 ΕΝΕΡΓΗ ΜΕΤΑΚΙΝΗΣΗ", "TripCompletionController"));
+        p.add(Box.createVerticalStrut(12));
+
+        JPanel tripCard = makeCard();
+        tripCard.add(new JLabel("Ενεργή Διαδρομή") {{ setFont(BOLD_SM); setForeground(ACCENT); }});
+        tripCard.add(Box.createVerticalStrut(4));
+        tripCard.add(makeRow("Εκκίνηση:",     "Τρίκαλα, Καρδίτσης 14", false));
+        tripCard.add(makeRow("Προορισμός:",   "Βιομηχανική Ζώνη, Λάρισα", false));
+        tripCard.add(makeRow("Επιβάτες:",     "Αλέξης Δ., Σοφία Κ.", false));
+        tripCard.add(makeRow("GPS:",          "✅ Ενεργό  (GPSNavigatorController)", false));
+        tripCard.add(makeRow("Εκτιμ. άφιξη:","08:53", false));
+        p.add(tripCard);
+        p.add(Box.createVerticalStrut(12));
+
+        JButton complete = makeAccentButton("🏁 ΟΛΟΚΛΗΡΩΣΗ ΔΙΑΔΡΟΜΗΣ");
+        complete.setAlignmentX(Component.CENTER_ALIGNMENT);
+        complete.setPreferredSize(new Dimension(280, 40));
+        complete.addActionListener(e -> {
+            JOptionPane.showMessageDialog(mainFrame,
+                    "✅ Διαδρομή ολοκληρώθηκε!\n\n" +
+                            "Trip [E]: status=completed  |  42.3 km  |  3.2 kg CO2\n" +
+                            "PointsController: +84 pontoi (42 km x 2.0 odigos)\n",
+                    "Ολοκλήρωση", JOptionPane.INFORMATION_MESSAGE);
+            showCard(CARD_RATING);
+        });
+        p.add(complete);
+        p.add(Box.createVerticalStrut(12));
+
+        p.add(makeWarnCard("⚠ GPS μη διαθέσιμο",
+                "Αν το GPS αποτύχει, το σύστημα ζητά χειροκίνητη επιβεβαίωση."));
+        p.add(Box.createVerticalStrut(10));
+
+        p.add(makeSectionLabel("Αναφορά Προβλήματος"));
+        p.add(Box.createVerticalStrut(6));
+        JButton dispute = makeButton("📢 Αναφορά Προβλήματος");
+        dispute.setForeground(CLR_ERROR);
+        dispute.setAlignmentX(Component.CENTER_ALIGNMENT);
+        dispute.addActionListener(e -> {
+            String reason = JOptionPane.showInputDialog(mainFrame,
+                    "Περιέγραψε το πρόβλημα:", "Αναφορά Προβλήματος", JOptionPane.PLAIN_MESSAGE);
+            if (reason != null && !reason.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(mainFrame,
+                        "(Dispute Request δημιουργήθηκε → admin queue)",
+                        "Αναφορά Εστάλη", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        p.add(dispute);
+
+        return wrapScroll(p);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 7 — RATING
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildRating() {
+        JPanel p = makeScrollPanel();
+
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader("⭐ ΑΞΙΟΛΟΓΗΣΗ", "παράθυρο 48 ωρών"));
+        p.add(Box.createVerticalStrut(12));
+
+        JPanel rateInfo = makeCard();
+        rateInfo.add(new JLabel("Αξιολόγησε τη μετακίνησή σου:") {{ setFont(SMALL); setForeground(MUTED); }});
+        rateInfo.add(new JLabel("Γιώργος Παπαδόπουλος  (Οδηγός)") {{ setFont(BOLD_SM); }});
+        rateInfo.add(new JLabel(TOMORROW + "  ·  08:15  ·  42.3 km") {{ setFont(SMALL); setForeground(MUTED); }});
+        p.add(rateInfo);
+        p.add(Box.createVerticalStrut(12));
+
+        p.add(makeSectionLabel("ΒΑΘΜΟΛΟΓΙΑ (1-5 αστέρια)"));
+        p.add(Box.createVerticalStrut(6));
+        JPanel starsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        starsPanel.setBackground(BG);
+        starsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        int[] selected = {0};
+        JButton[] stars = new JButton[5];
+        for (int i = 0; i < 5; i++) {
+            final int val = i + 1;
+            stars[i] = new JButton("★");
+            stars[i].setFont(new Font("SansSerif", Font.BOLD, 20));
+            stars[i].setForeground(MUTED);
+            stars[i].setBackground(BG);
+            stars[i].setBorderPainted(false);
+            stars[i].setFocusPainted(false);
+            stars[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            stars[i].addActionListener(e -> {
+                selected[0] = val;
+                for (int j = 0; j < 5; j++)
+                    stars[j].setForeground(j < val ? new Color(0xFFA000) : MUTED);
+            });
+            starsPanel.add(stars[i]);
+        }
+        p.add(starsPanel);
+        p.add(Box.createVerticalStrut(8));
+
+        p.add(makeSectionLabel("ΣΧΟΛΙΟ"));
+        p.add(Box.createVerticalStrut(4));
+        JTextArea commentArea = new JTextArea(3, 28);
+        commentArea.setFont(BODY);
+        commentArea.setLineWrap(true);
+        commentArea.setWrapStyleWord(true);
+        commentArea.setBorder(BorderFactory.createLineBorder(BORDER, 1));
+        JScrollPane commentScroll = new JScrollPane(commentArea);
+        commentScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        p.add(commentScroll);
+        p.add(Box.createVerticalStrut(4));
+        p.add(makeAltNote("ⓘ αν βαθμολογία ≤2 αστέρια, το σχόλιο είναι υποχρεωτικό."));
+        p.add(Box.createVerticalStrut(10));
+
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
+        p.add(Box.createVerticalStrut(4));
+
+        JButton submit = makeAccentButton("ΥΠΟΒΟΛΗ ΑΞΙΟΛΟΓΗΣΗΣ ✓");
+        submit.setAlignmentX(Component.CENTER_ALIGNMENT);
+        submit.addActionListener(e -> {
+            if (selected[0] == 0) { errLbl.setText("⚠ Επίλεξε τουλάχιστον 1 αστέρι."); return; }
+            if (selected[0] <= 2 && commentArea.getText().trim().isEmpty()) {
+                commentArea.setBorder(BorderFactory.createLineBorder(CLR_ERROR, 2));
+                errLbl.setText("⚠ Για βαθμολογία ≤2 αστέρια, το σχόλιο είναι υποχρεωτικό.");
+                return;
+            }
+            commentArea.setBorder(BorderFactory.createLineBorder(BORDER, 1));
+            errLbl.setText(" ");
+            JOptionPane.showMessageDialog(mainFrame,
+                    "✅ Αξιολόγηση υποβλήθηκε!\n" + selected[0] + " αστέρια",
+                    "Αξιολόγηση", JOptionPane.INFORMATION_MESSAGE);
+            showCard(CARD_DASH);
+        });
+        p.add(submit);
+        p.add(Box.createVerticalStrut(6));
+        JButton skip = makeButton("Παράλειψη");
+        skip.setForeground(MUTED);
+        skip.setAlignmentX(Component.CENTER_ALIGNMENT);
+        skip.addActionListener(e -> showCard(CARD_DASH));
+        p.add(skip);
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeNote("Παράθυρο αξιολόγησης: 48 ώρες από την ολοκλήρωση"));
+
+        return wrapScroll(p);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 8 — POINTS & PRIVILEGES
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildPrivileges() {
+        JPanel p = makeScrollPanel();
+
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader("🏆 ΠΟΝΤΟΙ & ΠΡΟΝΟΜΙΑ", "PointsController  |  LeaderboardController"));
+        p.add(Box.createVerticalStrut(12));
+
+        JPanel card = makeCard();
+        JLabel pts = new JLabel(USER_POINTS + " π.", SwingConstants.CENTER);
+        pts.setFont(new Font("SansSerif", Font.BOLD, 28));
+        pts.setForeground(ACCENT);
+        pts.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(pts);
+        card.add(Box.createVerticalStrut(4));
+        card.add(makeProgressBar(USER_POINTS, 500));
+        card.add(Box.createVerticalStrut(4));
+        card.add(new JLabel("Επίπεδο 3  |  180π. ακόμα για Επ.4  |  Leaderboard: #4 / 38") {{
+            setFont(SMALL); setForeground(MUTED); }});
+        card.add(Box.createVerticalStrut(6));
+        card.add(new JLabel("Πόντοι: km x 2.0 (οδηγός) ή km x 1.0 (επιβάτης)") {{
+            setFont(SMALL); setForeground(MUTED); }});
+        p.add(card);
+        p.add(Box.createVerticalStrut(12));
+
         p.add(makeSectionLabel("ΕΠΙΠΕΔΑ ΠΡΟΝΟΜΙΩΝ"));
         p.add(Box.createVerticalStrut(6));
-
         String[] cols = {"Επ.", "Πόντοι", "Προνόμιο", "Κατάσταση"};
         Object[][] rows = {
-            {"1", "50π.",   "Green Commuter Badge",  "✅ Ξεκλείδωτο"},
-            {"2", "150π.",  "Προτεραιότητα Parking", "✅ Ξεκλείδωτο"},
-            {"3", "300π.",  "Δωροκάρτα 10€",         "✅ Ξεκλείδωτο"},
-            {"4", "500π.",  "Extra Τηλεργασία",       "🔒 180π. ακόμα"},
-            {"5", "800π.",  "Μειωμένη Ασφάλιση",      "🔒 Κλειδωμένο"},
-            {"6", "1200π.", "Green MVP Trophy",        "🔒 Κλειδωμένο"},
+                {"1","50π.",  "Green Commuter Badge",  "✅ Ξεκλείδωτο"},
+                {"2","150π.", "Προτεραιότητα Parking", "✅ Ξεκλείδωτο"},
+                {"3","300π.", "Δωροκάρτα 10€",         "✅ Ξεκλείδωτο"},
+                {"4","500π.", "Extra Τηλεργασία",       "🔒 180π. ακόμα"},
+                {"5","800π.", "Μειωμένη Ασφάλιση",      "🔒 Κλειδωμένο"},
+                {"6","1200π.","Green MVP Trophy",        "🔒 Κλειδωμένο"},
         };
-
         JTable table = new JTable(rows, cols) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -626,11 +798,9 @@ public class CoRideMockup {
         table.setGridColor(BORDER);
         table.setShowGrid(true);
         table.setSelectionBackground(SUBTLE);
-
-        // Colour locked rows
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             public Component getTableCellRendererComponent(JTable t, Object v,
-                    boolean sel, boolean foc, int row, int col) {
+                                                           boolean sel, boolean foc, int row, int col) {
                 super.getTableCellRendererComponent(t, v, sel, foc, row, col);
                 setBackground(row < 3 ? new Color(0xF0FFF4) : new Color(0xFAFAFA));
                 setForeground(row < 3 ? ACCENT : MUTED);
@@ -638,101 +808,147 @@ public class CoRideMockup {
                 return this;
             }
         });
-
-        JScrollPane tableScroll = new JScrollPane(table);
-        tableScroll.setPreferredSize(new Dimension(360, 160));
-        tableScroll.setMaximumSize(new Dimension(360, 160));
-        p.add(tableScroll);
+        JScrollPane tScroll = new JScrollPane(table);
+        tScroll.setPreferredSize(new Dimension(380, 160));
+        tScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
+        p.add(tScroll);
         p.add(Box.createVerticalStrut(12));
 
         JButton redeem = makeAccentButton("ΕΞΑΡΓΥΡΩΣΗ ΠΡΟΝΟΜΙΟΥ");
         redeem.setAlignmentX(Component.CENTER_ALIGNMENT);
-        redeem.addActionListener(e ->
-            JOptionPane.showMessageDialog(null,
-                "✅ Η εξαργύρωση καταχωρήθηκε!\nΘα λάβετε επιβεβαίωση μέσω email.",
-                "Εξαργύρωση", JOptionPane.INFORMATION_MESSAGE));
+        redeem.addActionListener(e -> {
+            int res = JOptionPane.showOptionDialog(mainFrame,
+                    "Επίλεξε προνόμιο για εξαργύρωση:",
+                    "Εξαργύρωση — RedeemController",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                    new String[]{"Δωροκάρτα 10€ (300π.)", "Extra Τηλεργασία (500π.) — Εναλλ. Α2"}, null);
+            if (res == 0) {
+                JOptionPane.showMessageDialog(mainFrame,
+                        "✅ Εξαργύρωση επιτυχής!\n(Points deducted: -300π.  |  Coupon created)",
+                        "UC9a — Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+            } else if (res == 1) {
+                JOptionPane.showMessageDialog(mainFrame,
+                        "⚠ Ανεπαρκείς Πόντοι\nΈχεις: " + USER_POINTS + "π.  |  Απαιτούνται: 500π.\nΧρειάζεσαι ακόμα: 180π.",
+                        "Ανεπαρκείς Πόντοι", JOptionPane.WARNING_MESSAGE);
+            }
+        });
         p.add(redeem);
         p.add(Box.createVerticalStrut(8));
-        p.add(makeNote("* Πόντοι αποδίδονται ανά ολοκληρωμένη κοινή μετακίνηση (Trip)"));
-
+        p.add(makeNote("Πόντοι: km x 2.0 οδηγός  |  km x 1.0 επιβάτης"));
         p.add(Box.createVerticalStrut(8));
         p.add(makeSeparator());
         p.add(makeNavBar("Πόντοι"));
 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
+        return wrapScroll(p);
     }
 
-     // ══════════════════════════════════════════════════════════
-    // SCREEN 6 — STATISTICS
-    // ══════════════════════════════════════════════════════════
-    static void showStatistics() {
-        JFrame f = makeFrame("Οθόνη 6 — Στατιστικά", 400, 500);
-        JPanel p = makePanel();
- 
-        JButton back = makeButton("← Πίσω");
-        back.setForeground(ACCENT);
-        back.addActionListener(e -> showDashboard());
-        p.add(back);
- 
-        p.add(makeHeader("📊 ΣΤΑΤΙΣΤΙΚΑ","Statistics Aggregation"));
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 9 — PROFILE
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildProfile() {
+        JPanel p = makeScrollPanel();
+
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader("👤 ΠΡΟΦΙΛ", "ProfileController → Employee"));
         p.add(Box.createVerticalStrut(12));
- 
-        // Period Filter
-        p.add(makeSectionLabel("ΦΙΛΤΡΟ ΠΕΡΙΟΔΟΥ (Period Filter)"));
+
+        JTextField nameField  = new JTextField(USER_NAME, 18);
+        JTextField emailField = new JTextField(USER_EMAIL, 18);
+        emailField.setEditable(false);
+        emailField.setForeground(MUTED);
+        JTextField addrField  = new JTextField("Τρίκαλα, Καρδίτσης 14", 18);
+        JTextField schedField = new JTextField("08:00 - 17:00", 18);
+        JComboBox<String> roleBox = new JComboBox<>(new String[]{"Επιβάτης", "Οδηγός", "Οδηγός & Επιβάτης"});
+        roleBox.setSelectedIndex(2);
+        styleCombo(roleBox);
+
+        p.add(makeSectionLabel("ΣΤΟΙΧΕΙΑ ΛΟΓΑΡΙΑΣΜΟΥ"));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ονοματεπώνυμο:", nameField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Email (σταθερό):", emailField));
         p.add(Box.createVerticalStrut(4));
-        JComboBox<String> periodBox = new JComboBox<>(
-            new String[]{"Τελευταίος Μήνας", "Τελευταίο Τρίμηνο", "Τελευταίο Έτος", "Όλα"});
-        styleCombo(periodBox);
-        periodBox.setMaximumSize(new Dimension(200, 28));
-        p.add(periodBox);
-        p.add(Box.createVerticalStrut(10));
- 
-        // Statistics screen — entities: trip, points, rating
-        p.add(makeSectionLabel("ΑΠΟΤΕΛΕΣΜΑΤΑ (Statistics Aggregation → trip, points, rating)"));
+        p.add(makeAltNote("ⓘ Το email δεν μπορεί να αλλαχθεί μετά την εγγραφή."));
         p.add(Box.createVerticalStrut(6));
- 
-        JPanel statsCard = makeCard();
-        statsCard.add(makeRow("Συνολικές Μετακινήσεις:", "12 trips", true));
-        statsCard.add(makeRow("Συνολικά Χιλιόμετρα:",    "240 km",   false));
-        statsCard.add(makeRow("CO₂ που εξοικονομήθηκε:", "~18 kg",   false));
-        statsCard.add(makeRow("Μέση Αξιολόγηση:",        "4.7 ⭐",   false));
-        statsCard.add(makeRow("Πόντοι Περιόδου:",        "+120 π.",   false));
-        statsCard.add(makeRow("Θέση Leaderboard:",       "#4",        true));
-        p.add(statsCard);
-        p.add(Box.createVerticalStrut(10));
- 
-        // Filter Statistics View 
-        p.add(makeSectionLabel("ΑΝΑΛΥΤΙΚΑ ΑΝΑ ΜΗΝΑ (Filter Statistics View)"));
+        p.add(makeFieldRow("Διεύθυνση:", addrField));
         p.add(Box.createVerticalStrut(6));
-        JPanel detailCard = makeCard();
-        String[] months = {"Ιαν: 3 trips", "Φεβ: 4 trips", "Μαρ: 5 trips", "Απρ: 0 trips"};
-        for (String m : months) {
-            JLabel ml = new JLabel("• " + m);
-            ml.setFont(SMALL);
-            detailCard.add(ml);
-        }
-        p.add(detailCard);
-        p.add(Box.createVerticalStrut(10));
-        p.add(makeNote("* Εναλλ.: κενά δεδομένα → Empty State View (Statistics Controller)"));
- 
-        f.add(new JScrollPane(p));
-        f.setVisible(true);
+        p.add(makeFieldRow("Ωράριο:", schedField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ρόλος:", roleBox));
+        p.add(Box.createVerticalStrut(12));
+
+        p.add(makeSectionLabel("ΡΥΘΜΙΣΕΙΣ ΕΙΔΟΠΟΙΗΣΕΩΝ"));
+        p.add(Box.createVerticalStrut(6));
+        JPanel notifCard = makeCard();
+        JCheckBox emailNotif = new JCheckBox("Email ειδοποιήσεις", true);
+        JCheckBox pushNotif  = new JCheckBox("Push notifications", true);
+        emailNotif.setFont(SMALL); emailNotif.setBackground(Color.WHITE);
+        pushNotif.setFont(SMALL);  pushNotif.setBackground(Color.WHITE);
+        notifCard.add(emailNotif);
+        notifCard.add(pushNotif);
+        p.add(notifCard);
+        p.add(Box.createVerticalStrut(12));
+
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
+
+        JButton save = makeAccentButton("ΑΠΟΘΗΚΕΥΣΗ ΑΛΛΑΓΩΝ");
+        save.setAlignmentX(Component.CENTER_ALIGNMENT);
+        save.addActionListener(e -> {
+            if (nameField.getText().trim().isEmpty()) {
+                highlightError(nameField);
+                errLbl.setText("⚠ Το ονοματεπώνυμο δεν μπορεί να είναι κενό.");
+                return;
+            }
+            resetField(nameField);
+            errLbl.setText(" ");
+            JOptionPane.showMessageDialog(mainFrame,
+                    "✅ Αλλαγές αποθηκεύτηκαν!\n(Employee updated: " + nameField.getText().trim() + ")",
+                    "UC10 — Αποθήκευση", JOptionPane.INFORMATION_MESSAGE);
+        });
+        p.add(save);
+        p.add(Box.createVerticalStrut(8));
+
+        JButton changePwd = makeButton("🔐 Αλλαγή Κωδικού");
+        changePwd.setForeground(ACCENT);
+        changePwd.setAlignmentX(Component.CENTER_ALIGNMENT);
+        changePwd.addActionListener(e -> {
+            JPanel pwdPanel = new JPanel(new GridLayout(3, 2, 6, 6));
+            JPasswordField curr = new JPasswordField(15);
+            JPasswordField newP = new JPasswordField(15);
+            JPasswordField conf = new JPasswordField(15);
+            pwdPanel.add(new JLabel("Τρέχων κωδικός:")); pwdPanel.add(curr);
+            pwdPanel.add(new JLabel("Νέος κωδικός:"));   pwdPanel.add(newP);
+            pwdPanel.add(new JLabel("Επιβεβαίωση:"));    pwdPanel.add(conf);
+            int res = JOptionPane.showConfirmDialog(mainFrame, pwdPanel,
+                    "Αλλαγή Κωδικού", JOptionPane.OK_CANCEL_OPTION);
+            if (res == JOptionPane.OK_OPTION) {
+                if (new String(newP.getPassword()).length() < 8) {
+                    JOptionPane.showMessageDialog(mainFrame,
+                            "⚠ Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.",
+                            "Αδύναμος Κωδικός", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                JOptionPane.showMessageDialog(mainFrame,
+                        "✅ Κωδικός ενημερώθηκε! Απαιτείται επανασύνδεση.",
+                        "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                showCard(CARD_LOGIN);
+            }
+        });
+        p.add(changePwd);
+        p.add(Box.createVerticalStrut(8));
+        p.add(makeSeparator());
+        p.add(makeNavBar("Προφίλ"));
+
+        return wrapScroll(p);
     }
 
-    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
     // UI HELPERS
-    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
 
-    static JFrame makeFrame(String title, int w, int h) {
-        JFrame f = new JFrame(title);
-        f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        f.setSize(w, h);
-        f.setLocationRelativeTo(null);
-        return f;
-    }
-
-    static JPanel makePanel() {
+    //βοηθητικες μεθοδοι για να δημιουργηθουν τα UI components (χρηση για αποφυγη επανληψης κωδικα)
+    static JPanel makeScrollPanel() {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBackground(BG);
@@ -740,23 +956,42 @@ public class CoRideMockup {
         return p;
     }
 
+
+    static JPanel wrapScroll(JPanel inner) {
+        JScrollPane scroll = new JScrollPane(inner);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(12);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(scroll, BorderLayout.CENTER);
+        return wrapper;
+    }
+
+    static JButton makeBackButton(String targetCard) {
+        JButton b = makeButton("← Πίσω");
+        b.setForeground(ACCENT);
+        b.addActionListener(e -> showCard(targetCard));
+        return b;
+    }
+
+    static JLabel makeErrLabel() {
+        JLabel l = new JLabel(" ");
+        l.setFont(SMALL);
+        l.setForeground(CLR_ERROR);
+        l.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return l;
+    }
+
     static JPanel makeHeader(String title, String subtitle) {
         JPanel h = new JPanel();
         h.setLayout(new BoxLayout(h, BoxLayout.Y_AXIS));
         h.setBackground(SUBTLE);
         h.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 4, 0, 0, ACCENT),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
+                BorderFactory.createMatteBorder(0, 4, 0, 0, ACCENT),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
         h.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-        JLabel t = new JLabel(title);
-        t.setFont(TITLE);
-        t.setForeground(ACCENT);
-        JLabel s = new JLabel(subtitle);
-        s.setFont(SMALL);
-        s.setForeground(MUTED);
-        h.add(t);
-        h.add(s);
+        JLabel t = new JLabel(title); t.setFont(TITLE); t.setForeground(ACCENT);
+        JLabel s = new JLabel(subtitle); s.setFont(SMALL); s.setForeground(MUTED);
+        h.add(t); h.add(s);
         return h;
     }
 
@@ -765,11 +1000,59 @@ public class CoRideMockup {
         c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(Color.WHITE);
         c.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER, 1),
-            BorderFactory.createEmptyBorder(10, 14, 10, 14)
-        ));
+                BorderFactory.createLineBorder(BORDER, 1),
+                BorderFactory.createEmptyBorder(10, 14, 10, 14)));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
         return c;
+    }
+
+    static JPanel makeClickableCard(String label, Runnable onClick) {
+        JPanel c = makeCard();
+        JLabel lbl = new JLabel("▶ " + label);
+        lbl.setFont(BOLD_SM); lbl.setForeground(INFO_FG);
+        c.add(lbl);
+        c.add(Box.createVerticalStrut(4));
+        c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        c.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) { onClick.run(); }
+            public void mouseEntered(MouseEvent e) { c.setBackground(new Color(0xF0F8FF)); }
+            public void mouseExited(MouseEvent e)  { c.setBackground(Color.WHITE); }
+        });
+        return c;
+    }
+
+    static JPanel makeWarnCard(String title, String body) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(WARN_BG);
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(0xFFA000)),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        c.add(new JLabel(title) {{ setFont(BOLD_SM); setForeground(WARN_FG); }});
+        c.add(new JLabel("<html>" + body.replace("\n", "<br>") + "</html>") {{ setFont(SMALL); setForeground(WARN_FG); }});
+        return c;
+    }
+
+    static JPanel makeErrorCard(String title, String body) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(ERROR_BG);
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 4, 0, 0, CLR_ERROR),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        c.add(new JLabel(title) {{ setFont(BOLD_SM); setForeground(CLR_ERROR); }});
+        c.add(new JLabel(body)  {{ setFont(SMALL);   setForeground(CLR_ERROR); }});
+        return c;
+    }
+
+    static JLabel makeAltNote(String text) {
+        JLabel l = new JLabel(text);
+        l.setFont(SMALL); l.setForeground(INFO_FG);
+        l.setBackground(INFO_BG); l.setOpaque(true);
+        l.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
+        return l;
     }
 
     static JPanel makeFieldRow(String label, JComponent field) {
@@ -778,7 +1061,7 @@ public class CoRideMockup {
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         JLabel lbl = new JLabel(label);
         lbl.setFont(BODY);
-        lbl.setPreferredSize(new Dimension(100, 24));
+        lbl.setPreferredSize(new Dimension(140, 24));
         if (field instanceof JTextField) ((JTextField) field).setFont(BODY);
         row.add(lbl, BorderLayout.WEST);
         row.add(field, BorderLayout.CENTER);
@@ -788,8 +1071,7 @@ public class CoRideMockup {
     static JPanel makeRow(String label, String value, boolean bold) {
         JPanel row = new JPanel(new BorderLayout());
         row.setBackground(Color.WHITE);
-        JLabel l = new JLabel(label);
-        l.setFont(SMALL);
+        JLabel l = new JLabel(label); l.setFont(SMALL);
         JLabel v = new JLabel(value);
         v.setFont(bold ? BOLD_SM : SMALL);
         v.setForeground(bold ? ACCENT : FG);
@@ -800,10 +1082,7 @@ public class CoRideMockup {
 
     static JButton makeButton(String text) {
         JButton b = new JButton(text);
-        b.setFont(BODY);
-        b.setBackground(BG);
-        b.setForeground(FG);
-        b.setBorderPainted(true);
+        b.setFont(BODY); b.setBackground(BG); b.setForeground(FG);
         b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return b;
@@ -811,14 +1090,10 @@ public class CoRideMockup {
 
     static JButton makeAccentButton(String text) {
         JButton b = new JButton(text);
-        b.setFont(BOLD_SM);
-        b.setBackground(ACCENT);
-        b.setForeground(Color.WHITE);
-        b.setOpaque(true);
-        b.setBorderPainted(false);
-        b.setFocusPainted(false);
+        b.setFont(BOLD_SM); b.setBackground(ACCENT); b.setForeground(Color.WHITE);
+        b.setOpaque(true); b.setBorderPainted(false); b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.setPreferredSize(new Dimension(160, 34));
+        b.setPreferredSize(new Dimension(200, 36));
         return b;
     }
 
@@ -842,7 +1117,7 @@ public class CoRideMockup {
         s.setForeground(BORDER);
         return s;
     }
-
+// για απεικονιση ποντων
     static JPanel makeProgressBar(int current, int max) {
         JPanel bar = new JPanel(null) {
             public void paintComponent(Graphics g) {
@@ -853,32 +1128,44 @@ public class CoRideMockup {
                 g.fillRect(0, 0, (int)((double) current / max * getWidth()), getHeight());
             }
         };
-        bar.setPreferredSize(new Dimension(280, 8));
-        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
+        bar.setPreferredSize(new Dimension(300, 10));
+        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 10));
         return bar;
     }
-
+ // navigation bar στο κατω μερος του ui για γρηγορη μεταβαση μεταξυ οθονων
     static JPanel makeNavBar(String active) {
-        String[] items = {"🏠 Home", "🚗 Διαδρομές", "🏆 Πόντοι", "👤 Προφίλ"};
+        String[] items   = {"🏠 Home", "🚗 Διαδρομές", "🏆 Πόντοι", "👤 Προφίλ"};
+        String[] targets = {CARD_DASH, CARD_SEARCH, CARD_POINTS, CARD_PROFILE};
         JPanel nav = new JPanel(new GridLayout(1, 4));
         nav.setBackground(BG);
         nav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
-        nav.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        for (String item : items) {
-            JButton b = new JButton(item);
+        nav.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        for (int i = 0; i < items.length; i++) {
+            final String target = targets[i];
+            JButton b = new JButton(items[i]);
             b.setFont(new Font("SansSerif", Font.PLAIN, 9));
-            b.setBorderPainted(false);
-            b.setFocusPainted(false);
-            boolean isActive = item.contains(active);
+            b.setBorderPainted(false); b.setFocusPainted(false);
+            boolean isActive = items[i].contains(active);
             b.setBackground(isActive ? SUBTLE : BG);
             b.setForeground(isActive ? ACCENT : MUTED);
+            b.addActionListener(e -> showCard(target));
             nav.add(b);
         }
         return nav;
     }
 
+    static void highlightError(JComponent c) {
+        c.setBorder(BorderFactory.createLineBorder(CLR_ERROR, 2));
+    }
+//για επαναφορα πεδιου στην αρχικη μορφη
+    static void resetField(JComponent c) {
+        if (c instanceof JTextField)
+            c.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
+        else
+            c.setBorder(BorderFactory.createLineBorder(BORDER, 1));
+    }
+
     static void styleCombo(JComboBox<?> c) {
-        c.setFont(BODY);
-        c.setBackground(Color.WHITE);
+        c.setFont(BODY); c.setBackground(Color.WHITE);
     }
 }
