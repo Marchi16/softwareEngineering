@@ -10,7 +10,6 @@ reduce costs, and minimize environmental impact.
 
 ## Technologies
 - Java
-- MySQL
 
 ## Installation
 1. Clone the repository
