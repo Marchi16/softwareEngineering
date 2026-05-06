@@ -845,7 +845,29 @@ JScrollPane tScroll = new JScrollPane(table);
     // ══════════════════════════════════════════════════════════════════════════
     // SCREEN 9 — PROFILE
     // ══════════════════════════════════════════════════════════════════════════
-    static JPanel buildProfile() {
+  
+// Ενότητα: Στοιχεία Λογαριασμού
+// Εμφανίζει πεδία επεξεργασίας προφίλ (όνομα, email, διεύθυνση, ωράριο, ρόλος).
+// Το email εμφανίζεται ως σταθερό (δεν επιτρέπεται αλλαγή μετά την εγγραφή).
+
+// Ενότητα: Ρυθμίσεις Ειδοποιήσεων
+// Checkboxes για ενεργοποίηση/απενεργοποίηση email και push notifications.
+
+// Αποθήκευση αλλαγών με validation:
+// - Έλεγχος ότι το ονοματεπώνυμο δεν είναι κενό
+// - Εμφάνιση μηνύματος σφάλματος και highlight του πεδίου αν αποτύχει
+// - Εμφάνιση επιβεβαιωτικού dialog αν επιτύχει (UC10)
+
+// Dialog αλλαγής κωδικού:
+// - Ζητά τρέχοντα και νέο κωδικό (+ επιβεβαίωση)
+// - Ελέγχει ότι ο νέος κωδικός έχει τουλάχιστον 8 χαρακτήρες
+// - Σε επιτυχία, ο χρήστης αποσυνδέεται (επιστροφή στο login)
+
+/**
+ * Δημιουργεί το βασικό panel για οθόνες με κάθετη διάταξη (BoxLayout Y_AXIS).
+ * Χρησιμοποιείται ως βάση για όλα τα views της εφαρμογής.
+ */
+    static JPanel buildProfile() {
         JPanel p = makeScrollPanel();
 
         p.add(makeBackButton(CARD_DASH));
@@ -956,6 +978,10 @@ JScrollPane tScroll = new JScrollPane(table);
         return p;
     }
 
+    /**
+ * Τυλίγει ένα panel σε JScrollPane ώστε να υποστηρίζει κύλιση.
+ * Χρησιμοποιείται σε οθόνες με περιεχόμενο που υπερβαίνει το ύψος παραθύρου.
+ */
 
  static JPanel wrapScroll(JPanel inner) {
         JScrollPane scroll = new JScrollPane(inner);
@@ -966,6 +992,10 @@ JScrollPane tScroll = new JScrollPane(table);
         return wrapper;
     }
 
+    /**
+ * Δημιουργεί κουμπί πλοήγησης "← Πίσω" που μεταφέρει στο καθορισμένο card.
+ * @param targetCard το όνομα του card στο οποίο θα μεταφερθεί ο χρήστης
+ */
     static JButton makeBackButton(String targetCard) {
         JButton b = makeButton("← Πίσω");
         b.setForeground(ACCENT);
