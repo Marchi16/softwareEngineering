@@ -808,3 +808,169 @@ class CoRideMockup_v01 {
                 return this;
             }
         });
+JScrollPane tScroll = new JScrollPane(table);
+        tScroll.setPreferredSize(new Dimension(380, 160));
+        tScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
+        p.add(tScroll);
+        p.add(Box.createVerticalStrut(12));
+
+        JButton redeem = makeAccentButton("ΕΞΑΡΓΥΡΩΣΗ ΠΡΟΝΟΜΙΟΥ");
+        redeem.setAlignmentX(Component.CENTER_ALIGNMENT);
+        redeem.addActionListener(e -> {
+            int res = JOptionPane.showOptionDialog(mainFrame,
+                    "Επίλεξε προνόμιο για εξαργύρωση:",
+                    "Εξαργύρωση — RedeemController",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                    new String[]{"Δωροκάρτα 10€ (300π.)", "Extra Τηλεργασία (500π.) — Εναλλ. Α2"}, null);
+            if (res == 0) {
+                JOptionPane.showMessageDialog(mainFrame,
+                        " Εξαργύρωση επιτυχής!\n(Points deducted: -300π.  |  Coupon created)",
+                        "UC9a — Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+            } else if (res == 1) {
+                JOptionPane.showMessageDialog(mainFrame,
+                        " Ανεπαρκείς Πόντοι\nΈχεις: " + USER_POINTS + "π.  |  Απαιτούνται: 500π.\nΧρειάζεσαι ακόμα: 180π.",
+                        "Ανεπαρκείς Πόντοι", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+        p.add(redeem);
+        p.add(Box.createVerticalStrut(8));
+        p.add(makeNote("Πόντοι: km x 2.0 οδηγός  |  km x 1.0 επιβάτης"));
+        p.add(Box.createVerticalStrut(8));
+        p.add(makeSeparator());
+        p.add(makeNavBar("Πόντοι"));
+
+        return wrapScroll(p);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // SCREEN 9 — PROFILE
+    // ══════════════════════════════════════════════════════════════════════════
+    static JPanel buildProfile() {
+        JPanel p = makeScrollPanel();
+
+        p.add(makeBackButton(CARD_DASH));
+        p.add(makeHeader(" ΠΡΟΦΙΛ", "ProfileController → Employee"));
+        p.add(Box.createVerticalStrut(12));
+
+        JTextField nameField  = new JTextField(USER_NAME, 18);
+        JTextField emailField = new JTextField(USER_EMAIL, 18);
+        emailField.setEditable(false);
+        emailField.setForeground(MUTED);
+        JTextField addrField  = new JTextField("Τρίκαλα, Καρδίτσης 14", 18);
+        JTextField schedField = new JTextField("08:00 - 17:00", 18);
+        JComboBox<String> roleBox = new JComboBox<>(new String[]{"Επιβάτης", "Οδηγός", "Οδηγός & Επιβάτης"});
+        roleBox.setSelectedIndex(2);
+        styleCombo(roleBox);
+
+        p.add(makeSectionLabel("ΣΤΟΙΧΕΙΑ ΛΟΓΑΡΙΑΣΜΟΥ"));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ονοματεπώνυμο:", nameField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Email (σταθερό):", emailField));
+        p.add(Box.createVerticalStrut(4));
+        p.add(makeAltNote("ⓘ Το email δεν μπορεί να αλλαχθεί μετά την εγγραφή."));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Διεύθυνση:", addrField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ωράριο:", schedField));
+        p.add(Box.createVerticalStrut(6));
+        p.add(makeFieldRow("Ρόλος:", roleBox));
+        p.add(Box.createVerticalStrut(12));
+
+        p.add(makeSectionLabel("ΡΥΘΜΙΣΕΙΣ ΕΙΔΟΠΟΙΗΣΕΩΝ"));
+        p.add(Box.createVerticalStrut(6));
+        JPanel notifCard = makeCard();
+        JCheckBox emailNotif = new JCheckBox("Email ειδοποιήσεις", true);
+        JCheckBox pushNotif  = new JCheckBox("Push notifications", true);
+        emailNotif.setFont(SMALL); emailNotif.setBackground(Color.WHITE);
+        pushNotif.setFont(SMALL);  pushNotif.setBackground(Color.WHITE);
+        notifCard.add(emailNotif);
+        notifCard.add(pushNotif);
+        p.add(notifCard);
+        p.add(Box.createVerticalStrut(12));
+
+        JLabel errLbl = makeErrLabel();
+        p.add(errLbl);
+
+        JButton save = makeAccentButton("ΑΠΟΘΗΚΕΥΣΗ ΑΛΛΑΓΩΝ");
+        save.setAlignmentX(Component.CENTER_ALIGNMENT);
+        save.addActionListener(e -> {
+            if (nameField.getText().trim().isEmpty()) {
+                highlightError(nameField);
+                errLbl.setText(" Το ονοματεπώνυμο δεν μπορεί να είναι κενό.");
+                return;
+            }
+            resetField(nameField);
+            errLbl.setText(" ");
+            JOptionPane.showMessageDialog(mainFrame,
+                    " Αλλαγές αποθηκεύτηκαν!\n(Employee updated: " + nameField.getText().trim() + ")",
+                    "UC10 — Αποθήκευση", JOptionPane.INFORMATION_MESSAGE);
+        });
+        p.add(save);
+        p.add(Box.createVerticalStrut(8));
+
+        JButton changePwd = makeButton(" Αλλαγή Κωδικού");
+        changePwd.setForeground(ACCENT);
+        changePwd.setAlignmentX(Component.CENTER_ALIGNMENT);
+        changePwd.addActionListener(e -> {
+            JPanel pwdPanel = new JPanel(new GridLayout(3, 2, 6, 6));
+            JPasswordField curr = new JPasswordField(15);
+            JPasswordField newP = new JPasswordField(15);
+            JPasswordField conf = new JPasswordField(15);
+            pwdPanel.add(new JLabel("Τρέχων κωδικός:")); pwdPanel.add(curr);
+            pwdPanel.add(new JLabel("Νέος κωδικός:"));   pwdPanel.add(newP);
+            pwdPanel.add(new JLabel("Επιβεβαίωση:"));    pwdPanel.add(conf);
+            int res = JOptionPane.showConfirmDialog(mainFrame, pwdPanel,
+                    "Αλλαγή Κωδικού", JOptionPane.OK_CANCEL_OPTION);
+            if (res == JOptionPane.OK_OPTION) {
+                if (new String(newP.getPassword()).length() < 8) {
+                    JOptionPane.showMessageDialog(mainFrame,
+                            " Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.",
+                            "Αδύναμος Κωδικός", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                JOptionPane.showMessageDialog(mainFrame,
+                        " Κωδικός ενημερώθηκε! Απαιτείται επανασύνδεση.",
+                        "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                showCard(CARD_LOGIN);
+            }
+        });
+        p.add(changePwd);
+        p.add(Box.createVerticalStrut(8));
+        p.add(makeSeparator());
+        p.add(makeNavBar("Προφίλ"));
+
+        return wrapScroll(p);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // UI HELPERS
+    // ══════════════════════════════════════════════════════════════════════════
+
+    //βοηθητικες μεθοδοι για να δημιουργηθουν τα UI components (χρηση για αποφυγη επανληψης κωδικα)
+    static JPanel makeScrollPanel() {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setBackground(BG);
+        p.setBorder(BorderFactory.createEmptyBorder(20, 24, 20, 24));
+        return p;
+    }
+
+
+ static JPanel wrapScroll(JPanel inner) {
+        JScrollPane scroll = new JScrollPane(inner);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(12);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(scroll, BorderLayout.CENTER);
+        return wrapper;
+    }
+
+    static JButton makeBackButton(String targetCard) {
+        JButton b = makeButton("← Πίσω");
+        b.setForeground(ACCENT);
+        b.addActionListener(e -> showCard(targetCard));
+        return b;
+    }
+
+    
