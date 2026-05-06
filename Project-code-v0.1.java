@@ -972,5 +972,200 @@ JScrollPane tScroll = new JScrollPane(table);
         b.addActionListener(e -> showCard(targetCard));
         return b;
     }
+ static JLabel makeErrLabel() {
+        JLabel l = new JLabel(" ");
+        l.setFont(SMALL);
+        l.setForeground(CLR_ERROR);
+        l.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return l;
+    }
 
+    static JPanel makeHeader(String title, String subtitle) {
+        JPanel h = new JPanel();
+        h.setLayout(new BoxLayout(h, BoxLayout.Y_AXIS));
+        h.setBackground(SUBTLE);
+        h.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 4, 0, 0, ACCENT),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        h.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        JLabel t = new JLabel(title); t.setFont(TITLE); t.setForeground(ACCENT);
+        JLabel s = new JLabel(subtitle); s.setFont(SMALL); s.setForeground(MUTED);
+        h.add(t); h.add(s);
+        return h;
+    }
+
+    static JPanel makeCard() {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(Color.WHITE);
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER, 1),
+                BorderFactory.createEmptyBorder(10, 14, 10, 14)));
+        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
+        return c;
+    }
+
+    static JPanel makeClickableCard(String label, Runnable onClick) {
+        JPanel c = makeCard();
+        JLabel lbl = new JLabel("▶ " + label);
+        lbl.setFont(BOLD_SM); lbl.setForeground(INFO_FG);
+        c.add(lbl);
+        c.add(Box.createVerticalStrut(4));
+        c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        c.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) { onClick.run(); }
+            public void mouseEntered(MouseEvent e) { c.setBackground(new Color(0xF0F8FF)); }
+            public void mouseExited(MouseEvent e)  { c.setBackground(Color.WHITE); }
+        });
+        return c;
+    }
+
+    static JPanel makeWarnCard(String title, String body) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(WARN_BG);
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(0xFFA000)),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        c.add(new JLabel(title) {{ setFont(BOLD_SM); setForeground(WARN_FG); }});
+        c.add(new JLabel("<html>" + body.replace("\n", "<br>") + "</html>") {{ setFont(SMALL); setForeground(WARN_FG); }});
+        return c;
+    }
+
+    static JPanel makeErrorCard(String title, String body) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(ERROR_BG);
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 4, 0, 0, CLR_ERROR),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        c.add(new JLabel(title) {{ setFont(BOLD_SM); setForeground(CLR_ERROR); }});
+        c.add(new JLabel(body)  {{ setFont(SMALL);   setForeground(CLR_ERROR); }});
+        return c;
+    }
+
+    static JLabel makeAltNote(String text) {
+        JLabel l = new JLabel(text);
+        l.setFont(SMALL); l.setForeground(INFO_FG);
+        l.setBackground(INFO_BG); l.setOpaque(true);
+        l.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
+        return l;
+    }
+
+    static JPanel makeFieldRow(String label, JComponent field) {
+        JPanel row = new JPanel(new BorderLayout(8, 0));
+        row.setBackground(BG);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(BODY);
+        lbl.setPreferredSize(new Dimension(140, 24));
+        if (field instanceof JTextField) ((JTextField) field).setFont(BODY);
+        row.add(lbl, BorderLayout.WEST);
+        row.add(field, BorderLayout.CENTER);
+        return row;
+    }
+
+    static JPanel makeRow(String label, String value, boolean bold) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.setBackground(Color.WHITE);
+        JLabel l = new JLabel(label); l.setFont(SMALL);
+        JLabel v = new JLabel(value);
+        v.setFont(bold ? BOLD_SM : SMALL);
+        v.setForeground(bold ? ACCENT : FG);
+        row.add(l, BorderLayout.WEST);
+        row.add(v, BorderLayout.EAST);
+        return row;
+    }
+
+    static JButton makeButton(String text) {
+        JButton b = new JButton(text);
+        b.setFont(BODY); b.setBackground(BG); b.setForeground(FG);
+        b.setFocusPainted(false);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return b;
+    }
+
+    static JButton makeAccentButton(String text) {
+        JButton b = new JButton(text);
+        b.setFont(BOLD_SM); b.setBackground(ACCENT); b.setForeground(Color.WHITE);
+        b.setOpaque(true); b.setBorderPainted(false); b.setFocusPainted(false);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.setPreferredSize(new Dimension(200, 36));
+        return b;
+    }
+
+    static JLabel makeSectionLabel(String text) {
+        JLabel l = new JLabel(text);
+        l.setFont(new Font("SansSerif", Font.BOLD, 10));
+        l.setForeground(MUTED);
+        return l;
+    }
+
+    static JLabel makeNote(String text) {
+        JLabel l = new JLabel("<html><i>" + text + "</i></html>");
+        l.setFont(new Font("SansSerif", Font.ITALIC, 10));
+        l.setForeground(MUTED);
+        return l;
+    }
+
+    static JSeparator makeSeparator() {
+        JSeparator s = new JSeparator();
+        s.setMaximumSize(new Dimension(Integer.MAX_VALUE, 2));
+        s.setForeground(BORDER);
+        return s;
+    }
+// για απεικονιση ποντων
+    static JPanel makeProgressBar(int current, int max) {
+        JPanel bar = new JPanel(null) {
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(BORDER);
+                g.fillRect(0, 0, getWidth(), getHeight());
+                g.setColor(ACCENT2);
+                g.fillRect(0, 0, (int)((double) current / max * getWidth()), getHeight());
+            }
+        };
+        bar.setPreferredSize(new Dimension(300, 10));
+        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 10));
+        return bar;
+    }
+ // navigation bar στο κατω μερος του ui για γρηγορη μεταβαση μεταξυ οθονων
+    static JPanel makeNavBar(String active) {
+        String[] items   = {"🏠 Home", "🚗 Διαδρομές", "🏆 Πόντοι", "👤 Προφίλ"};
+        String[] targets = {CARD_DASH, CARD_SEARCH, CARD_POINTS, CARD_PROFILE};
+        JPanel nav = new JPanel(new GridLayout(1, 4));
+        nav.setBackground(BG);
+        nav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
+        nav.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        for (int i = 0; i < items.length; i++) {
+            final String target = targets[i];
+            JButton b = new JButton(items[i]);
+            b.setFont(new Font("SansSerif", Font.PLAIN, 9));
+            b.setBorderPainted(false); b.setFocusPainted(false);
+            boolean isActive = items[i].contains(active);
+            b.setBackground(isActive ? SUBTLE : BG);
+            b.setForeground(isActive ? ACCENT : MUTED);
+            b.addActionListener(e -> showCard(target));
+            nav.add(b);
+        }
+        return nav;
+    }
+
+    static void highlightError(JComponent c) {
+        c.setBorder(BorderFactory.createLineBorder(CLR_ERROR, 2));
+    }
+//για επαναφορα πεδιου στην αρχικη μορφη
+    static void resetField(JComponent c) {
+        if (c instanceof JTextField)
+            c.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
+        else
+            c.setBorder(BorderFactory.createLineBorder(BORDER, 1));
+    }
+
+    static void styleCombo(JComboBox<?> c) {
+        c.setFont(BODY); c.setBackground(Color.WHITE);
+    }
+}
     
